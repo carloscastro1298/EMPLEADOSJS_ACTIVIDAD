@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ejercicio Final — Gestor de Empleados</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #F9FAFC; color: #181E4B; }
+
+    /* ── HEADER ── */
+    header {
+      background: #6B5CFF;
+      color: #fff;
+      padding: 1.5rem 2rem;
+    }
+    header h1 { font-size: 1.5rem; }
+    header p  { font-size: 0.9rem; opacity: 0.85; margin-top: 0.3rem; }
+
+    .tags-header {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.8rem;
+    }
+    .tag {
+      padding: 0.2rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .tag-closure  { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    .tag-callback { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    .tag-this     { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    .tag-dom      { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .contenedor {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .col-izquierda { grid-column: 1; }
+    .col-derecha   { grid-column: 2; }
+    .col-completa  { grid-column: 1 / -1; }
+
+    /* ── TARJETAS ── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.4rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #6B5CFF;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #ECF0F6;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* ── FORMULARIO ── */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6B5CFF;
+      margin-bottom: 0.25rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.55rem 0.85rem;
+      border: 2px solid #ECF0F6;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 0.8rem;
+      outline: none;
+      transition: border 0.2s;
+      font-family: inherit;
+    }
+    input:focus, select:focus { border-color: #6B5CFF; }
+
+    .btn {
+      background: #6B5CFF;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .btn:hover        { background: #5546E8; }
+    .btn-danger       { background: #FE654F; }
+    .btn-danger:hover { background: #e0452f; }
+    .btn-secondary       { background: #E2E8F0; color: #181E4B; }
+    .btn-secondary:hover { background: #CBD5E1; }
+
+    /* ── LISTA DE EMPLEADOS ── */
+    .empleado-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 0.9rem;
+      border: 2px solid #ECF0F6;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      transition: border 0.2s;
+    }
+    .empleado-item:hover { border-color: #6B5CFF; }
+    .empleado-item.activo { border-color: #6B5CFF; background: #EDE9FF; }
+
+    .empleado-info { flex: 1; }
+    .empleado-nombre {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: #181E4B;
+    }
+    .empleado-detalle {
+      font-size: 0.76rem;
+      color: #64748B;
+      margin-top: 0.15rem;
+    }
+
+    .empleado-acciones {
+      display: flex;
+      gap: 0.3rem;
+    }
+    .empleado-acciones button {
+      background: #EDE9FF;
+      color: #6B5CFF;
+      border: none;
+      padding: 3px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: background 0.15s;
+    }
+    .empleado-acciones button:hover { background: #6B5CFF; color: #fff; }
+    .empleado-acciones .btn-elim {
+      background: #FFE8E4;
+      color: #FE654F;
+    }
+    .empleado-acciones .btn-elim:hover { background: #FE654F; color: #fff; }
+
+    /* ── ESTADÍSTICAS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .stat-box {
+      background: #F9FAFC;
+      border: 2px solid #ECF0F6;
+      border-radius: 8px;
+      padding: 0.8rem;
+      text-align: center;
+    }
+    .stat-box .stat-num {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #6B5CFF;
+      line-height: 1;
+    }
+    .stat-box .stat-label {
+      font-size: 0.72rem;
+      color: #64748B;
+      margin-top: 0.2rem;
+    }
+
+    /* ── FILTROS ── */
+    .filtros {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .filtro-btn {
+      background: #F9FAFC;
+      border: 2px solid #ECF0F6;
+      color: #64748B;
+      padding: 0.3rem 0.8rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filtro-btn:hover  { border-color: #6B5CFF; color: #6B5CFF; }
+    .filtro-btn.activo { background: #6B5CFF; border-color: #6B5CFF; color: #fff; }
+
+    /* ── TABLA DE RESULTADOS ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th {
+      background: #6B5CFF;
+      color: #fff;
+      padding: 0.5rem 0.8rem;
+      text-align: left;
+      font-size: 0.8rem;
+    }
+    td {
+      padding: 0.45rem 0.8rem;
+      border-bottom: 1px solid #ECF0F6;
+    }
+    tr:nth-child(even) { background: #F9FAFC; }
+    .badge-dept {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .dept-tech    { background: #EDE9FF; color: #6B5CFF; }
+    .dept-ventas  { background: #D1FAF0; color: #065F46; }
+    .dept-rrhh    { background: #FEF3C7; color: #92400E; }
+    .dept-diseno  { background: #FFE8E4; color: #7F1D1D; }
+
+    /* ── NOTIFICACIONES ── */
+    .notif-area {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 300px;
+    }
+    .notif {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      animation: entrar 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    @keyframes entrar {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .notif-ok      { background: #D1FAF0; border-left: 4px solid #5ACCA4; color: #065F46; }
+    .notif-error   { background: #FFE8E4; border-left: 4px solid #FE654F; color: #7F1D1D; }
+    .notif-info    { background: #EDE9FF; border-left: 4px solid #6B5CFF; color: #3B2FAA; }
+    .notif-warning { background: #FEF3C7; border-left: 4px solid #E6CA52; color: #92400E; }
+
+    /* ── HISTORIAL ── */
+    .historial-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: #64748B;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .historial-item:last-child { border-bottom: none; }
+    .historial-item .hist-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #6B5CFF;
+      flex-shrink: 0;
+    }
+    .hist-hora {
+      font-size: 0.7rem;
+      color: #94A3B8;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── ESTADO VACÍO ── */
+    .estado-vacio {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #94A3B8;
+      font-size: 0.85rem;
+    }
+    .estado-vacio .icono { font-size: 2rem; margin-bottom: 0.4rem; }
+
+    /* ── BUSCADOR ── */
+    .buscador-wrap {
+      position: relative;
+      margin-bottom: 0.8rem;
+    }
+    .buscador-wrap input {
+      padding-left: 2.2rem;
+      margin-bottom: 0;
+    }
+    .buscador-wrap .icono-buscar {
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94A3B8;
+      font-size: 0.9rem;
+    }
+
+    /* ── BARRA DE PROGRESO SALARIO ── */
+    .salario-barra {
+      height: 5px;
+      background: #ECF0F6;
+      border-radius: 99px;
+      margin-top: 3px;
+      overflow: hidden;
+    }
+    .salario-fill {
+      height: 100%;
+      background: #6B5CFF;
+      border-radius: 99px;
+      transition: width 0.4s;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .contenedor {
+        grid-template-columns: 1fr;
+      }
+      .col-izquierda,
+      .col-derecha,
+      .col-completa { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── ÁREA DE NOTIFICACIONES ── -->
+<div class="notif-area" id="notifArea"></div>
+
+<!-- ── HEADER ── -->
+<header>
+  <h1>👥 Gestor de Empleados</h1>
+  <p>Ejercicio integrador · Aplica todo lo aprendido en la Lección 2</p>
+  <div class="tags-header">
+    <span class="tag tag-closure">Closure</span>
+    <span class="tag tag-callback">Callbacks</span>
+    <span class="tag tag-this">This</span>
+    <span class="tag tag-dom">DOM</span>
+  </div>
+</header>
+
+<div class="contenedor">
+
+  <!-- ══════════════════════════════════════════════
+       COLUMNA IZQUIERDA — Formulario + Historial
+  ══════════════════════════════════════════════ -->
+  <div class="col-izquierda">
+
+    <!-- FORMULARIO AGREGAR EMPLEADO -->
+    <div class="card">
+      <h2>➕ Agregar empleado</h2>
+
+      <label for="inputNombre">Nombre completo</label>
+      <input type="text" id="inputNombre" placeholder="Ej: Ana García" />
+
+      <label for="inputDept">Departamento</label>
+      <select id="inputDept">
+        <option value="">-- Selecciona --</option>
+        <option value="tech">💻 Tecnología</option>
+        <option value="ventas">📊 Ventas</option>
+        <option value="rrhh">👥 RRHH</option>
+        <option value="diseno">🎨 Diseño</option>
+      </select>
+
+      <label for="inputSalario">Salario mensual ($)</label>
+      <input type="number" id="inputSalario" placeholder="Ej: 3500000" />
+
+      <label for="inputAntiguedad">Años de antigüedad</label>
+      <input type="number" id="inputAntiguedad" placeholder="Ej: 3" min="0" />
+
+      <button class="btn" onclick="agregarEmpleado()">Agregar empleado</button>
+      <button class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+    </div>
+
+    <!-- HISTORIAL DE ACCIONES (closure privado) -->
+    <div class="card">
+      <h2>📋 Historial de acciones</h2>
+      <p style="font-size:0.8rem;color:#94A3B8;margin-bottom:0.8rem">
+        El historial vive en un <strong>closure privado</strong> dentro de
+        <code>crearGestor()</code>. Solo se puede leer a través del método
+        <code>obtenerHistorial()</code>.
+      </p>
+      <div id="historialLista">
+        <div class="estado-vacio">
+          <div class="icono">📭</div>
+          Aún no hay acciones registradas
+        </div>
+      </div>
+      <br>
+      <button class="btn btn-danger" onclick="limpiarHistorial()">Borrar historial</button>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       COLUMNA DERECHA — Estadísticas + Lista
+  ══════════════════════════════════════════════ -->
+  <div class="col-derecha">
+
+    <!-- ESTADÍSTICAS (this + callbacks) -->
+    <div class="card">
+      <h2>📊 Estadísticas del equipo</h2>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-label">Total empleados</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statPromSalario">$0</div>
+          <div class="stat-label">Salario promedio</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statMasAntiguo">—</div>
+          <div class="stat-label">Más antiguo</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statMayorSalario">—</div>
+          <div class="stat-label">Mayor salario</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTA DE EMPLEADOS -->
+    <div class="card">
+      <h2>👤 Lista de empleados</h2>
+
+      <!-- Buscador -->
+      <div class="buscador-wrap">
+        <span class="icono-buscar">🔍</span>
+        <input
+          type="text"
+          id="inputBuscar"
+          placeholder="Buscar por nombre..."
+          oninput="buscarEmpleados(this.value)"
+        />
+      </div>
+
+      <!-- Filtros por departamento -->
+      <div class="filtros">
+        <button class="filtro-btn activo" onclick="filtrarPorDept('todos', this)">Todos</button>
+        <button class="filtro-btn" onclick="filtrarPorDept('tech', this)">💻 Tech</button>
+        <button class="filtro-btn" onclick="filtrarPorDept('ventas', this)">📊 Ventas</button>
+        <button class="filtro-btn" onclick="filtrarPorDept('rrhh', this)">👥 RRHH</button>
+        <button class="filtro-btn" onclick="filtrarPorDept('diseno', this)">🎨 Diseño</button>
+      </div>
+
+      <!-- Lista dinámica -->
+      <div id="listaEmpleados">
+        <div class="estado-vacio">
+          <div class="icono">👥</div>
+          Agrega empleados con el formulario
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       FILA COMPLETA — Tabla con filtros de salario
+  ══════════════════════════════════════════════ -->
+  <div class="col-completa">
+    <div class="card">
+      <h2>💰 Reporte de nómina</h2>
+      <p style="font-size:0.8rem;color:#94A3B8;margin-bottom:1rem">
+        Usa <strong>callbacks</strong> de <code>filter</code>, <code>map</code>
+        y <code>reduce</code> para procesar el array de empleados y generar este reporte.
+      </p>
+
+      <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:140px">
+          <label for="filtroMin">Salario mínimo</label>
+          <input type="number" id="filtroMin" placeholder="Ej: 1000000" style="margin-bottom:0" />
+        </div>
+        <div style="flex:1;min-width:140px">
+          <label for="filtroMax">Salario máximo</label>
+          <input type="number" id="filtroMax" placeholder="Ej: 5000000" style="margin-bottom:0" />
+        </div>
+        <button class="btn" onclick="generarReporte()">Generar reporte</button>
+        <button class="btn btn-secondary" onclick="resetearReporte()">Resetear</button>
+      </div>
+
+      <div id="tablaReporte">
+        <div class="estado-vacio">
+          <div class="icono">📄</div>
+          El reporte aparecerá aquí
+        </div>
+      </div>
+
+      <div id="totalNomina" style="margin-top:0.8rem;font-size:0.85rem;color:#6B5CFF;font-weight:700;display:none"></div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT — ESCRIBE AQUÍ TU SOLUCIÓN
+     Lee con cuidado qué se espera de cada función antes de empezar.
+════════════════════════════════════════════════════════════ -->
+<script src="gestion.js">
+
+  // ════════════════════════════════════════════════════════
+  //  1. crearGestor() — CLOSURE + THIS
+  //
+  //  Debes crear una función "crearGestor()" que retorne un objeto.
+  //  El objeto tendrá acceso a un array privado "_empleados" y a
+  //  un array privado "_historial", ambos viviendo en el closure.
+  //
+  //  El objeto retornado debe tener estos métodos (que usan THIS):
+  //
+  //  · agregar(empleado, callback)
+  //      - Agrega el empleado al array privado _empleados
+  //      - Registra la acción en _historial con hora y descripción
+  //      - Ejecuta el callback si es una función, pasándole el empleado
+  //      - Actualiza el DOM: lista, estadísticas e historial
+  //
+  //  · eliminar(id, callback)
+  //      - Usa filter() para quitar el empleado con ese id del array privado
+  //      - Registra la acción en _historial
+  //      - Ejecuta el callback si es una función
+  //      - Actualiza el DOM
+  //
+  //  · buscar(texto)
+  //      - Usa filter() con un callback para filtrar por nombre
+  //      - Retorna el array filtrado (no modifica el original)
+  //
+  //  · filtrarDept(dept)
+  //      - Usa filter() con un callback para filtrar por departamento
+  //      - Si dept es "todos", retorna todos
+  //      - Retorna el array filtrado
+  //
+  //  · estadisticas()
+  //      - Usa THIS para llamar a obtenerEmpleados()
+  //      - Usa reduce() para calcular el salario promedio
+  //      - Usa reduce() para encontrar al de mayor salario
+  //      - Usa reduce() para encontrar al más antiguo
+  //      - Retorna un objeto con: total, promSalario, mayorSalario, masAntiguo
+  //
+  //  · obtenerEmpleados()
+  //      - Retorna una COPIA del array privado _empleados (usa spread)
+  //
+  //  · obtenerHistorial()
+  //      - Retorna una COPIA del array privado _historial (usa spread)
+  //
+  //  · limpiarHistorial()
+  //      - Vacía el array _historial del closure
+  //      - Actualiza el DOM del historial
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  2. Instancia del gestor
+  //
+  //  Llama a crearGestor() y guarda el resultado en "const gestor"
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  3. agregarEmpleado() — DOM + CLOSURE + CALLBACK
+  //
+  //  Se llama al presionar "Agregar empleado".
+  //  Debe:
+  //  · Leer los 4 inputs del formulario con getElementById
+  //  · Validar que ninguno esté vacío — si falta alguno, mostrar notificación de error
+  //  · Crear el objeto empleado: { id, nombre, dept, salario, antiguedad }
+  //    (el id puede ser Date.now() para que sea único)
+  //  · Llamar a gestor.agregar(empleado, callback) pasando un callback
+  //    que muestre una notificación de éxito con el nombre del empleado
+  //  · Limpiar el formulario después de agregar
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  4. eliminarEmpleado(id) — DOM + CLOSURE + CALLBACK
+  //
+  //  Se llama al presionar "✕" en un empleado de la lista.
+  //  Debe:
+  //  · Llamar a gestor.eliminar(id, callback)
+  //  · El callback debe mostrar una notificación de aviso con el nombre
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  5. buscarEmpleados(texto) — CALLBACK + DOM
+  //
+  //  Se llama al escribir en el buscador (oninput).
+  //  Debe:
+  //  · Llamar a gestor.buscar(texto) que usa filter() internamente
+  //  · Renderizar en el DOM solo los empleados que coincidan
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  6. filtrarPorDept(dept, btnElement) — CALLBACK + DOM
+  //
+  //  Se llama al presionar un filtro de departamento.
+  //  Debe:
+  //  · Quitar la clase "activo" de todos los botones filtro
+  //  · Agregar la clase "activo" al botón presionado
+  //  · Llamar a gestor.filtrarDept(dept) que usa filter() internamente
+  //  · Renderizar en el DOM los empleados filtrados
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  7. renderizarLista(empleados) — DOM
+  //
+  //  Recibe un array de empleados y los pinta en el DOM.
+  //  Para cada empleado crea un .empleado-item con:
+  //  · Nombre, departamento y salario formateado
+  //  · Barra de salario proporcional al máximo del array
+  //  · Botón "✕" que llama a eliminarEmpleado(empleado.id)
+  //  Si el array está vacío, muestra el .estado-vacio
+  //
+  //  Los departamentos tienen clases CSS ya definidas:
+  //  .dept-tech / .dept-ventas / .dept-rrhh / .dept-diseno
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  8. actualizarEstadisticas() — THIS + CALLBACKS + DOM
+  //
+  //  Llama a gestor.estadisticas() — que usa THIS internamente —
+  //  y actualiza los 4 bloques de estadísticas en el DOM:
+  //  · #statTotal       → total de empleados
+  //  · #statPromSalario → salario promedio formateado
+  //  · #statMasAntiguo  → nombre del empleado más antiguo
+  //  · #statMayorSalario→ nombre del de mayor salario
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  9. actualizarHistorial() — CLOSURE + DOM
+  //
+  //  Llama a gestor.obtenerHistorial() (que retorna la copia del closure)
+  //  y renderiza cada entrada en #historialLista usando el HTML:
+  //  .historial-item > .hist-dot + texto + .hist-hora
+  //  Si está vacío, muestra el .estado-vacio
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  10. generarReporte() — CALLBACKS + DOM
+  //
+  //  Lee los inputs #filtroMin y #filtroMax.
+  //  Con el array de empleados:
+  //  · Usa filter() con un callback para quedarse con los del rango de salario
+  //  · Usa map() para transformarlos en filas HTML de la tabla
+  //  · Usa reduce() para calcular el total de nómina del reporte
+  //  · Renderiza la <table> en #tablaReporte con columnas:
+  //    Nombre / Departamento / Salario / Antigüedad / % del total
+  //  · Muestra el total en #totalNomina
+  //
+  //  Los departamentos usan las clases .badge-dept y .dept-[nombre]
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  11. mostrarNotificacion(mensaje, tipo) — CLOSURE + DOM
+  //
+  //  Crea una función "crearNotificador()" que use un CLOSURE
+  //  para contar cuántas notificaciones se han mostrado.
+  //  Retorna una función que:
+  //  · Crea un .notif con la clase .notif-[tipo] (ok/error/info/warning)
+  //  · Lo agrega a #notifArea
+  //  · Lo elimina automáticamente después de 3 segundos con setTimeout
+  //
+  //  Instancia el notificador: const mostrarNotificacion = crearNotificador()
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  12. limpiarFormulario() — DOM
+  //
+  //  Limpia los 4 inputs del formulario asignando "" a su .value
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  13. limpiarHistorial() — CLOSURE + DOM
+  //
+  //  Llama a gestor.limpiarHistorial() y actualiza el DOM
+  // ════════════════════════════════════════════════════════
+
+
+
+  // ════════════════════════════════════════════════════════
+  //  14. resetearReporte() — DOM
+  //
+  //  Limpia los inputs de filtro y vuelve a mostrar el .estado-vacio
+  //  en #tablaReporte. Oculta #totalNomina.
+  // ════════════════════════════════════════════════════════
+
+
+</script>
+</body>
+</html>
