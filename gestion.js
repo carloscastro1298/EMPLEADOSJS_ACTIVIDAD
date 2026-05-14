@@ -1,310 +1,310 @@
 function crearGestor() {
-  let _empleados = [];
-  let _historial = [];
+    let _empleados = [];
+    let _historial = [];
 
-  return {
+    return {
     agregar: function (empleado, callback) {
-      _empleados.push(empleado);
+    _empleados.push(empleado);
 
-      _historial.push({
+    _historial.push({
         accion: `Se agregó a ${empleado.nombre}`,
         hora: new Date().toLocaleTimeString()
-      });
+    });
 
-      if (typeof callback === "function") {
+    if (typeof callback === "function") {
         callback(empleado);
-      }
+    }
 
-      renderizarLista(_empleados);
-      actualizarEstadisticas();
-      actualizarHistorial();
+    renderizarLista(_empleados);
+    actualizarEstadisticas();
+    actualizarHistorial();
     },
 
     eliminar: function (id, callback) {
-      const empleadoEliminado = _empleados.find(emp => emp.id === id);
+    const empleadoEliminado = _empleados.find(emp => emp.id === id);
 
-      _empleados = _empleados.filter(emp => emp.id !== id);
+    _empleados = _empleados.filter(emp => emp.id !== id);
 
-      _historial.push({
+    _historial.push({
         accion: `Se eliminó a ${empleadoEliminado.nombre}`,
         hora: new Date().toLocaleTimeString()
-      });
+    });
 
-      if (typeof callback === "function") {
+    if (typeof callback === "function") {
         callback(empleadoEliminado);
-      }
+    }
 
-      renderizarLista(_empleados);
-      actualizarEstadisticas();
-      actualizarHistorial();
+    renderizarLista(_empleados);
+    actualizarEstadisticas();
+    actualizarHistorial();
     },
 
     buscar: function (texto) {
-      return _empleados.filter(emp =>
+    return _empleados.filter(emp =>
         emp.nombre.toLowerCase().includes(texto.toLowerCase())
-      );
+    );
     },
 
     filtrarDept: function (dept) {
-      if (dept === "todos") {
+    if (dept === "todos") {
         return [..._empleados];
-      }
+    }
 
-      return _empleados.filter(emp => emp.dept === dept);
+    return _empleados.filter(emp => emp.dept === dept);
     },
 
     estadisticas: function () {
-      const empleados = this.obtenerEmpleados();
+    const empleados = this.obtenerEmpleados();
 
-      const total = empleados.length;
+    const total = empleados.length;
 
-      const promSalario =
+    const promSalario =
         total === 0
-          ? 0
-          : empleados.reduce((acc, emp) => acc + emp.salario, 0) / total;
+        ? 0
+        : empleados.reduce((acc, emp) => acc + emp.salario, 0) / total;
 
-      const mayorSalario =
+    const mayorSalario =
         total === 0
-          ? null
-          : empleados.reduce((max, emp) =>
-              emp.salario > max.salario ? emp : max
+        ? null
+        : empleados.reduce((max, emp) =>
+            emp.salario > max.salario ? emp : max
             );
 
-      const masAntiguo =
+    const masAntiguo =
         total === 0
-          ? null
-          : empleados.reduce((max, emp) =>
-              emp.antiguedad > max.antiguedad ? emp : max
+        ? null
+        : empleados.reduce((max, emp) =>
+            emp.antiguedad > max.antiguedad ? emp : max
             );
 
-      return {
+    return {
         total,
         promSalario,
         mayorSalario,
         masAntiguo
-      };
+    };
     },
 
     obtenerEmpleados: function () {
-      return [..._empleados];
+    return [..._empleados];
     },
 
     obtenerHistorial: function () {
-      return [..._historial];
+    return [..._historial];
     },
 
     limpiarHistorial: function () {
-      _historial = [];
-      actualizarHistorial();
+    _historial = [];
+    actualizarHistorial();
     }
-  };
+};
 }
 
 const gestor = crearGestor();
 
 function agregarEmpleado() {
-  const nombre = document.getElementById("inputNombre").value;
-  const dept = document.getElementById("inputDept").value;
-  const salario = document.getElementById("inputSalario").value;
-  const antiguedad = document.getElementById("inputAntiguedad").value;
+    const nombre = document.getElementById("inputNombre").value;
+    const dept = document.getElementById("inputDept").value;
+    const salario = document.getElementById("inputSalario").value;
+    const antiguedad = document.getElementById("inputAntiguedad").value;
 
-  if (!nombre || !dept || !salario || !antiguedad) {
+if (!nombre || !dept || !salario || !antiguedad) {
     mostrarNotificacion("Todos los campos son obligatorios", "error");
     return;
-  }
+}
 
-  const empleado = {
+const empleado = {
     id: Date.now(),
     nombre: nombre,
     dept: dept,
     salario: Number(salario),
     antiguedad: Number(antiguedad)
-  };
+};
 
-  gestor.agregar(empleado, function (emp) {
+gestor.agregar(empleado, function (emp) {
     mostrarNotificacion(`${emp.nombre} agregado correctamente`, "ok");
-  });
+});
 
-  limpiarFormulario();
+limpiarFormulario();
 }
 
 function eliminarEmpleado(id) {
-  gestor.eliminar(id, function (emp) {
+    gestor.eliminar(id, function (emp) {
     mostrarNotificacion(`${emp.nombre} fue eliminado`, "warning");
-  });
+    });
 }
 
 function buscarEmpleados(texto) {
-  const resultados = gestor.buscar(texto);
-  renderizarLista(resultados);
+    const resultados = gestor.buscar(texto);
+    renderizarLista(resultados);
 }
 
 function filtrarPorDept(dept, btnElement) {
-  const botones = document.querySelectorAll(".filtro-btn");
+    const botones = document.querySelectorAll(".filtro-btn");
 
-  botones.forEach(function (btn) {
+    botones.forEach(function (btn) {
     btn.classList.remove("activo");
-  });
+    });
 
-  btnElement.classList.add("activo");
+    btnElement.classList.add("activo");
 
-  const filtrados = gestor.filtrarDept(dept);
+    const filtrados = gestor.filtrarDept(dept);
 
-  renderizarLista(filtrados);
+    renderizarLista(filtrados);
 }
 
 function renderizarLista(empleados) {
-  const lista = document.getElementById("listaEmpleados");
+    const lista = document.getElementById("listaEmpleados");
 
-  if (empleados.length === 0) {
+    if (empleados.length === 0) {
     lista.innerHTML = `
-      <div class="estado-vacio">
+    <div class="estado-vacio">
         <div class="icono">👥</div>
         No hay empleados
-      </div>
+    </div>
     `;
     return;
-  }
+    }
 
-  const maxSalario = Math.max(...empleados.map(emp => emp.salario));
+    const maxSalario = Math.max(...empleados.map(emp => emp.salario));
 
-  lista.innerHTML = empleados.map(function (emp) {
+    lista.innerHTML = empleados.map(function (emp) {
     const porcentaje = (emp.salario / maxSalario) * 100;
 
     return `
-      <div class="empleado-item">
+    <div class="empleado-item">
         <div class="empleado-info">
-          <div class="empleado-nombre">${emp.nombre}</div>
+        <div class="empleado-nombre">${emp.nombre}</div>
 
-          <div class="empleado-detalle">
+        <div class="empleado-detalle">
             ${emp.dept} · $${emp.salario.toLocaleString()}
-          </div>
+        </div>
 
-          <div class="salario-barra">
+        <div class="salario-barra">
             <div class="salario-fill" style="width:${porcentaje}%"></div>
-          </div>
+        </div>
         </div>
 
         <div class="empleado-acciones">
-          <button class="btn-elim" onclick="eliminarEmpleado(${emp.id})">
+        <button class="btn-elim" onclick="eliminarEmpleado(${emp.id})">
             ✕
-          </button>
+        </button>
         </div>
-      </div>
+    </div>
     `;
-  }).join("");
+    }).join("");
 }
 
 function actualizarEstadisticas() {
-  const stats = gestor.estadisticas();
+    const stats = gestor.estadisticas();
 
-  document.getElementById("statTotal").textContent = stats.total;
+    document.getElementById("statTotal").textContent = stats.total;
 
-  document.getElementById("statPromSalario").textContent =
+    document.getElementById("statPromSalario").textContent =
     "$" + Math.round(stats.promSalario).toLocaleString();
 
-  document.getElementById("statMasAntiguo").textContent =
+    document.getElementById("statMasAntiguo").textContent =
     stats.masAntiguo ? stats.masAntiguo.nombre : "—";
 
-  document.getElementById("statMayorSalario").textContent =
+    document.getElementById("statMayorSalario").textContent =
     stats.mayorSalario ? stats.mayorSalario.nombre : "—";
 }
 
 function actualizarHistorial() {
-  const historial = gestor.obtenerHistorial();
+    const historial = gestor.obtenerHistorial();
 
-  const contenedor = document.getElementById("historialLista");
+    const contenedor = document.getElementById("historialLista");
 
-  if (historial.length === 0) {
+    if (historial.length === 0) {
     contenedor.innerHTML = `
-      <div class="estado-vacio">
+    <div class="estado-vacio">
         <div class="icono">📭</div>
         No hay historial
-      </div>
+    </div>
     `;
     return;
-  }
+    }
 
-  contenedor.innerHTML = historial.map(function (item) {
+    contenedor.innerHTML = historial.map(function (item) {
     return `
-      <div class="historial-item">
+    <div class="historial-item">
         <div class="hist-dot"></div>
         <span>${item.accion}</span>
         <span class="hist-hora">${item.hora}</span>
-      </div>
+    </div>
     `;
-  }).join("");
+    }).join("");
 }
 
 function generarReporte() {
-  const min = Number(document.getElementById("filtroMin").value) || 0;
-  const max = Number(document.getElementById("filtroMax").value) || Infinity;
+    const min = Number(document.getElementById("filtroMin").value) || 0;
+    const max = Number(document.getElementById("filtroMax").value) || Infinity;
 
-  const empleados = gestor.obtenerEmpleados();
+    const empleados = gestor.obtenerEmpleados();
 
-  const filtrados = empleados.filter(function (emp) {
+    const filtrados = empleados.filter(function (emp) {
     return emp.salario >= min && emp.salario <= max;
-  });
+    });
 
-  const totalNomina = filtrados.reduce(function (acc, emp) {
+    const totalNomina = filtrados.reduce(function (acc, emp) {
     return acc + emp.salario;
-  }, 0);
+    }, 0);
 
-  const tabla = document.getElementById("tablaReporte");
+    const tabla = document.getElementById("tablaReporte");
 
-  if (filtrados.length === 0) {
+    if (filtrados.length === 0) {
     tabla.innerHTML = `
-      <div class="estado-vacio">
+    <div class="estado-vacio">
         <div class="icono">📄</div>
         No hay resultados
-      </div>
+    </div>
     `;
     return;
-  }
+    }
 
-  tabla.innerHTML = `
+    tabla.innerHTML = `
     <table>
-      <thead>
+    <thead>
         <tr>
-          <th>Nombre</th>
-          <th>Departamento</th>
-          <th>Salario</th>
-          <th>Antigüedad</th>
-          <th>% Total</th>
+        <th>Nombre</th>
+        <th>Departamento</th>
+        <th>Salario</th>
+        <th>Antigüedad</th>
+        <th>% Total</th>
         </tr>
-      </thead>
+    </thead>
 
-      <tbody>
+    <tbody>
         ${filtrados.map(function (emp) {
-          return `
+        return `
             <tr>
-              <td>${emp.nombre}</td>
+            <td>${emp.nombre}</td>
 
-              <td>
+            <td>
                 <span class="badge-dept dept-${emp.dept}">
-                  ${emp.dept}
+                ${emp.dept}
                 </span>
-              </td>
+            </td>
 
-              <td>$${emp.salario.toLocaleString()}</td>
+            <td>$${emp.salario.toLocaleString()}</td>
 
-              <td>${emp.antiguedad} años</td>
+            <td>${emp.antiguedad} años</td>
 
-              <td>
+            <td>
                 ${((emp.salario / totalNomina) * 100).toFixed(1)}%
-              </td>
+            </td>
             </tr>
-          `;
+        `;
         }).join("")}
-      </tbody>
+    </tbody>
     </table>
-  `;
+    `;
 
-  const total = document.getElementById("totalNomina");
+    const total = document.getElementById("totalNomina");
 
-  total.style.display = "block";
+    total.style.display = "block";
 
-  total.textContent =
+    total.textContent =
     `Total nómina: $${totalNomina.toLocaleString()}`;
 }
 
